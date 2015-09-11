@@ -42,8 +42,13 @@ t_lb_surface.fill((50,50,50,80))
 blob = Player(surface)
 pygame.display.set_caption("Agar.io")
 cell_list = list()
-font = pygame.font.Font("Ubuntu-B.ttf",20)
-big_font = pygame.font.Font("Ubuntu-B.ttf",24)
+try:
+    font = pygame.font.Font("Ubuntu-B.ttf",20)
+    big_font = pygame.font.Font("Ubuntu-B.ttf",24)
+except:
+    print("Font file not found: Ubuntu-B.ttf")
+    font = pygame.font.SysFont('Ubuntu',20,True)
+    big_font = pygame.font.SysFont('Ubuntu',24,True)
 
 class Cell:
     def __init__(self,surface):
@@ -87,6 +92,7 @@ def draw_HUD():
 
 spawn_cells()
 clock = pygame.time.Clock()
+
 while(True):
     clock.tick(60)
     for e in pygame.event.get():
