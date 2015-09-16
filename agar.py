@@ -48,8 +48,7 @@ class Player:
     def collisionDetection(self):
         for cell in cell_list:
             if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass):
-                self.mass+=1
-                print(cell.x,cell.y,self.x,self.y)
+                self.mass+=2
                 cell_list.remove(cell)
 
     def move(self):
@@ -67,7 +66,7 @@ class Player:
         
     def draw(self):
         pygame.draw.circle(self.surface,self.color,(int(self.x),int(self.y)),self.mass)
-        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x),int(self.y)),self.mass,int(80/self.mass))
+        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x),int(self.y)),self.mass)
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
             drawText(self.name, (self.x-int(fw/2),self.y-int(fh/2)),(50,50,50))
@@ -76,7 +75,7 @@ class Cell:
     def __init__(self,surface):
         self.x = random.randint(20,480)
         self.y = random.randint(20,480)
-        self.mass = 5-1
+        self.mass = 7
         self.surface = surface
         self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
         
