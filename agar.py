@@ -32,10 +32,26 @@ def getDistance(pos1,pos2):
 
     return ((diffX**2)+(diffY**2))**(0.5)
 
+class Camera:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.width = screen_width
+        self.height = screen_height
+        self.zoom = 1.0
+   
+    def centre(self,blobOrPos):
+        if(isinstance(blobOrPos,Player)):
+            p = blobOrPos
+            self.x = (p.startX-p.x)-p.startX+250
+            self.y = (p.startY-p.y)-p.startY+250
+        elif(type(blobOrPos) == tuple):
+            self.x,self.y = blobOrPos
+
 class Player:
     def __init__(self,surface,name = ""):
-        self.x = random.randint(100,400)
-        self.y = random.randint(100,400)
+        self.startX = self.x = random.randint(100,400)
+        self.startY = self.y = random.randint(100,400)
         self.mass = 20
         self.surface = surface
         self.color = colors_players[random.randint(0,len(colors_players)-1)]
@@ -53,7 +69,7 @@ class Player:
 
     def move(self):
         dX,dY = pygame.mouse.get_pos()
-        rotation = math.atan2(dY-self.y,dX-self.x)*180/math.pi
+        rotation = math.atan2(dY-250,dX-250)*180/math.pi
         speed = 2
         vx = speed * (90-math.fabs(rotation))/90
         vy = 0
@@ -64,12 +80,12 @@ class Player:
         self.x += vx
         self.y += vy
         
-    def draw(self):
-        pygame.draw.circle(self.surface,self.color,(int(self.x),int(self.y)),self.mass)
-        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x),int(self.y)),self.mass)
+    def draw(self,cam):
+        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass))
+        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass+3))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
-            drawText(self.name, (self.x-int(fw/2),self.y-int(fh/2)),(50,50,50))
+            drawText(self.name, (self.x+cam.x-int(fw/2),self.y+cam.y-int(fh/2)),(50,50,50))
 
 class Cell:
     def __init__(self,surface):
@@ -79,8 +95,8 @@ class Cell:
         self.surface = surface
         self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
         
-    def draw(self):
-        pygame.draw.circle(self.surface,self.color,(self.x,self.y),self.mass)
+    def draw(self,cam):
+        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),self.mass)
 
 def spawn_cells():
     for i in range(0,120):
@@ -89,9 +105,10 @@ def spawn_cells():
         
 def draw_grid():
     for i in range(0,screen_width,20):
-        pygame.draw.line(surface,(234,242,246),(0,i),(screen_width,i))
-        pygame.draw.line(surface,(234,242,246),(i,0),(i,screen_height))
+        pygame.draw.line(surface,(234,242,246),(0+camera.x,i+camera.y),(screen_width+camera.x,i+camera.y))
+        pygame.draw.line(surface,(234,242,246),(i+camera.x,0+camera.y),(i+camera.x,screen_height+camera.y))
 
+camera = Camera()
 blob = Player(surface,"Viliami")
 spawn_cells()
 
@@ -121,10 +138,13 @@ while(True):
         if(e.type == pygame.QUIT):
             pygame.quit()
     blob.update()
+
+    camera.centre(blob)
     surface.fill((242,251,255))
+    #surface.fill((0,0,0))
     draw_grid()
     for c in cell_list:
-        c.draw()
-    blob.draw()
+        c.draw(camera)
+    blob.draw(camera)
     draw_HUD()
     pygame.display.flip()
