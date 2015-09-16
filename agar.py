@@ -4,17 +4,53 @@ pygame.init()
 colors_players = [(37,7,255),(35,183,253),(48,254,241),(19,79,251),(255,7,230),(255,7,23),(6,254,13)]
 colors_cells = [(80,252,54),(36,244,255),(243,31,46),(4,39,243),(254,6,178),(255,211,7),(216,6,254),(145,255,7),(7,255,182),(255,6,86),(147,7,255)]
 colors_viruses = [(66,254,71)]
+screen_width, screen_height = (500,500)
+surface = pygame.display.set_mode((screen_width,screen_height))
+t_surface = pygame.Surface((95,25),pygame.SRCALPHA) #transparent rect for score
+t_lb_surface = pygame.Surface((155,278),pygame.SRCALPHA) #transparent rect for leaderboard
+t_surface.fill((50,50,50,80))
+t_lb_surface.fill((50,50,50,80))
+pygame.display.set_caption("Agar.io")
+cell_list = list()
+clock = pygame.time.Clock()
+try:
+    font = pygame.font.Font("Ubuntu-B.ttf",20)
+    big_font = pygame.font.Font("Ubuntu-B.ttf",24)
+except:
+    print("Font file not found: Ubuntu-B.ttf")
+    font = pygame.font.SysFont('Ubuntu',20,True)
+    big_font = pygame.font.SysFont('Ubuntu',24,True)
+
+def drawText(message,pos,color=(255,255,255)):
+        surface.blit(font.render(message,1,color),pos)
+
+def getDistance(pos1,pos2):
+    px,py = pos1
+    p2x,p2y = pos2
+    diffX = math.fabs(px-p2x)
+    diffY = math.fabs(py-p2y)
+
+    return ((diffX**2)+(diffY**2))**(0.5)
 
 class Player:
-    def __init__(self,surface):
+    def __init__(self,surface,name = ""):
         self.x = random.randint(100,400)
         self.y = random.randint(100,400)
         self.mass = 20
         self.surface = surface
         self.color = colors_players[random.randint(0,len(colors_players)-1)]
+        self.name = name
     
     def update(self):
         self.move()
+        self.collisionDetection()
+
+    def collisionDetection(self):
+        for cell in cell_list:
+            if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass):
+                self.mass+=1
+                print(cell.x,cell.y,self.x,self.y)
+                cell_list.remove(cell)
 
     def move(self):
         dX,dY = pygame.mouse.get_pos()
@@ -32,23 +68,9 @@ class Player:
     def draw(self):
         pygame.draw.circle(self.surface,self.color,(int(self.x),int(self.y)),self.mass)
         pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x),int(self.y)),self.mass,int(80/self.mass))
-
-screen_width, screen_height = (500,500)
-surface = pygame.display.set_mode((screen_width,screen_height))
-t_surface = pygame.Surface((95,25),pygame.SRCALPHA) #transparent rect for score
-t_lb_surface = pygame.Surface((155,278),pygame.SRCALPHA) #transparent rect for leaderboard
-t_surface.fill((50,50,50,80))
-t_lb_surface.fill((50,50,50,80))
-blob = Player(surface)
-pygame.display.set_caption("Agar.io")
-cell_list = list()
-try:
-    font = pygame.font.Font("Ubuntu-B.ttf",20)
-    big_font = pygame.font.Font("Ubuntu-B.ttf",24)
-except:
-    print("Font file not found: Ubuntu-B.ttf")
-    font = pygame.font.SysFont('Ubuntu',20,True)
-    big_font = pygame.font.SysFont('Ubuntu',24,True)
+        if(len(self.name) > 0):
+            fw, fh = font.size(self.name)
+            drawText(self.name, (self.x-int(fw/2),self.y-int(fh/2)),(50,50,50))
 
 class Cell:
     def __init__(self,surface):
@@ -71,13 +93,14 @@ def draw_grid():
         pygame.draw.line(surface,(234,242,246),(0,i),(screen_width,i))
         pygame.draw.line(surface,(234,242,246),(i,0),(i,screen_height))
 
-def drawText(string,pos,color=(255,255,255)):
-    surface.blit(font.render(string,0,color),pos)
+blob = Player(surface,"Viliami")
+spawn_cells()
 
 def draw_HUD():
-    surface.blit(t_surface,(8,screen_height-30))
+    w,h = font.size("Score: "+str(blob.mass)+" ")
+    surface.blit(pygame.transform.scale(t_surface,(w,h)),(8,screen_height-30))
     surface.blit(t_lb_surface,(screen_width-160,15))
-    drawText("Score: 10",(10,screen_height-30))
+    drawText("Score: " + str(blob.mass),(10,screen_height-30))
     surface.blit(big_font.render("Leaderboard",0,(255,255,255)),(screen_width-157,20))
     drawText("1. G #1",(screen_width-157,20+25))
     drawText("2. G #2",(screen_width-157,20+25*2))
@@ -89,9 +112,6 @@ def draw_HUD():
     drawText("8. G #3",(screen_width-157,20+25*8))
     drawText("9. doge",(screen_width-157,20+25*9))
     drawText("10. G #4",(screen_width-157,20+25*10))
-
-spawn_cells()
-clock = pygame.time.Clock()
 
 while(True):
     clock.tick(60)
