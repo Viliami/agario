@@ -63,7 +63,7 @@ class Player:
 
     def collisionDetection(self):
         for cell in cell_list:
-            if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass):
+            if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass/2):
                 self.mass+=0.5
                 cell_list.remove(cell)
 
@@ -81,8 +81,8 @@ class Player:
         self.y += vy
         
     def draw(self,cam):
-        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int((self.mass+3)*camera.zoom))
-        pygame.draw.circle(self.surface,self.color,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass*camera.zoom))
+        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int((self.mass/2+3)*camera.zoom))
+        pygame.draw.circle(self.surface,self.color,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass/2*camera.zoom))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
             drawText(self.name, (self.x*cam.zoom+cam.x-int(fw/2),self.y*cam.zoom+cam.y-int(fh/2)),(50,50,50))
@@ -141,7 +141,7 @@ while(True):
         if(e.type == pygame.QUIT):
             pygame.quit()
     blob.update()
-
+    camera.zoom = 100/(blob.mass)
     camera.centre(blob)
     surface.fill((242,251,255))
     #surface.fill((0,0,0))
