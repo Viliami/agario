@@ -81,8 +81,8 @@ class Player:
         self.y += vy
         
     def draw(self,cam):
-        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass))
         pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass+3))
+        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
             drawText(self.name, (self.x+cam.x-int(fw/2),self.y+cam.y-int(fh/2)),(50,50,50))
