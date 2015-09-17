@@ -38,13 +38,13 @@ class Camera:
         self.y = 0
         self.width = screen_width
         self.height = screen_height
-        self.zoom = 1.0
+        self.zoom = 0.5
    
     def centre(self,blobOrPos):
         if(isinstance(blobOrPos,Player)):
             p = blobOrPos
-            self.x = (p.startX-p.x)-p.startX+(screen_width/2)
-            self.y = (p.startY-p.y)-p.startY+(screen_height/2)
+            self.x = (p.startX-(p.x*self.zoom))-p.startX+((screen_width/2))
+            self.y = (p.startY-(p.y*self.zoom))-p.startY+((screen_height/2))
         elif(type(blobOrPos) == tuple):
             self.x,self.y = blobOrPos
 
@@ -81,11 +81,11 @@ class Player:
         self.y += vy
         
     def draw(self,cam):
-        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass+3))
-        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),int(self.mass))
+        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int((self.mass+3)*camera.zoom))
+        pygame.draw.circle(self.surface,self.color,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass*camera.zoom))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
-            drawText(self.name, (self.x+cam.x-int(fw/2),self.y+cam.y-int(fh/2)),(50,50,50))
+            drawText(self.name, (self.x*cam.zoom+cam.x-int(fw/2),self.y*cam.zoom+cam.y-int(fh/2)),(50,50,50))
 
 class Cell:
     def __init__(self,surface):
@@ -96,7 +96,7 @@ class Cell:
         self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
         
     def draw(self,cam):
-        pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),self.mass)
+        pygame.draw.circle(self.surface,self.color,(int((self.x*cam.zoom+cam.x)),int(self.y*cam.zoom+cam.y)),int(self.mass*cam.zoom))
 
 def spawn_cells(numOfCells):
     for i in range(numOfCells):
@@ -105,8 +105,8 @@ def spawn_cells(numOfCells):
         
 def draw_grid():
     for i in range(0,2001,25):
-        pygame.draw.line(surface,(230,240,240),(0+camera.x,i+camera.y),(2001+camera.x,i+camera.y),3)
-        pygame.draw.line(surface,(230,240,240),(i+camera.x,0+camera.y),(i+camera.x,2001+camera.y),3)
+        pygame.draw.line(surface,(230,240,240),(0+camera.x,i*camera.zoom+camera.y),(2001*camera.zoom+camera.x,i*camera.zoom+camera.y),3)
+        pygame.draw.line(surface,(230,240,240),(i*camera.zoom+camera.x,0+camera.y),(i*camera.zoom+camera.x,2001*camera.zoom+camera.y),3)
 
 camera = Camera()
 blob = Player(surface,"Viliami")
@@ -127,10 +127,13 @@ def draw_HUD():
     drawText("7. [voz]plz team",(screen_width-157,20+25*7))
     drawText("8. G #3",(screen_width-157,20+25*8))
     drawText("9. doge",(screen_width-157,20+25*9))
-    drawText("10. G #4",(screen_width-157,20+25*10))
+    if(blob.mass <= 500):
+        drawText("10. G #4",(screen_width-157,20+25*10))
+    else:
+        drawText("10. Viliami",(screen_width-157,20+25*10),(210,0,0))
 
 while(True):
-    clock.tick(60)
+    clock.tick(70)
     for e in pygame.event.get():
         if(e.type == pygame.KEYDOWN):
             if(e.key == pygame.K_ESCAPE):
