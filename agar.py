@@ -4,7 +4,7 @@ pygame.init()
 colors_players = [(37,7,255),(35,183,253),(48,254,241),(19,79,251),(255,7,230),(255,7,23),(6,254,13)]
 colors_cells = [(80,252,54),(36,244,255),(243,31,46),(4,39,243),(254,6,178),(255,211,7),(216,6,254),(145,255,7),(7,255,182),(255,6,86),(147,7,255)]
 colors_viruses = [(66,254,71)]
-screen_width, screen_height = (500,500)
+screen_width, screen_height = (800,500)
 surface = pygame.display.set_mode((screen_width,screen_height))
 t_surface = pygame.Surface((95,25),pygame.SRCALPHA) #transparent rect for score
 t_lb_surface = pygame.Surface((155,278),pygame.SRCALPHA) #transparent rect for leaderboard
@@ -43,8 +43,8 @@ class Camera:
     def centre(self,blobOrPos):
         if(isinstance(blobOrPos,Player)):
             p = blobOrPos
-            self.x = (p.startX-p.x)-p.startX+250
-            self.y = (p.startY-p.y)-p.startY+250
+            self.x = (p.startX-p.x)-p.startX+(screen_width/2)
+            self.y = (p.startY-p.y)-p.startY+(screen_height/2)
         elif(type(blobOrPos) == tuple):
             self.x,self.y = blobOrPos
 
@@ -64,13 +64,13 @@ class Player:
     def collisionDetection(self):
         for cell in cell_list:
             if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass):
-                self.mass+=2
+                self.mass+=0.5
                 cell_list.remove(cell)
 
     def move(self):
         dX,dY = pygame.mouse.get_pos()
-        rotation = math.atan2(dY-250,dX-250)*180/math.pi
-        speed = 2
+        rotation = math.atan2(dY-(float(screen_height)/2),dX-(float(screen_width)/2))*180/math.pi
+        speed = 5-1
         vx = speed * (90-math.fabs(rotation))/90
         vy = 0
         if(rotation < 0):
@@ -89,8 +89,8 @@ class Player:
 
 class Cell:
     def __init__(self,surface):
-        self.x = random.randint(20,480)
-        self.y = random.randint(20,480)
+        self.x = random.randint(20,1980)
+        self.y = random.randint(20,1980)
         self.mass = 7
         self.surface = surface
         self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
@@ -98,25 +98,25 @@ class Cell:
     def draw(self,cam):
         pygame.draw.circle(self.surface,self.color,(int(self.x+cam.x),int(self.y+cam.y)),self.mass)
 
-def spawn_cells():
-    for i in range(0,120):
+def spawn_cells(numOfCells):
+    for i in range(numOfCells):
         cell = Cell(surface)
         cell_list.append(cell)
         
 def draw_grid():
-    for i in range(0,screen_width,20):
-        pygame.draw.line(surface,(234,242,246),(0+camera.x,i+camera.y),(screen_width+camera.x,i+camera.y))
-        pygame.draw.line(surface,(234,242,246),(i+camera.x,0+camera.y),(i+camera.x,screen_height+camera.y))
+    for i in range(0,2001,25):
+        pygame.draw.line(surface,(230,240,240),(0+camera.x,i+camera.y),(2001+camera.x,i+camera.y),3)
+        pygame.draw.line(surface,(230,240,240),(i+camera.x,0+camera.y),(i+camera.x,2001+camera.y),3)
 
 camera = Camera()
 blob = Player(surface,"Viliami")
-spawn_cells()
+spawn_cells(2000)
 
 def draw_HUD():
-    w,h = font.size("Score: "+str(blob.mass)+" ")
+    w,h = font.size("Score: "+str(int(blob.mass*2))+" ")
     surface.blit(pygame.transform.scale(t_surface,(w,h)),(8,screen_height-30))
     surface.blit(t_lb_surface,(screen_width-160,15))
-    drawText("Score: " + str(blob.mass),(10,screen_height-30))
+    drawText("Score: " + str(int(blob.mass*2)),(10,screen_height-30))
     surface.blit(big_font.render("Leaderboard",0,(255,255,255)),(screen_width-157,20))
     drawText("1. G #1",(screen_width-157,20+25))
     drawText("2. G #2",(screen_width-157,20+25*2))
