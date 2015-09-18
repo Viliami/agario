@@ -56,6 +56,8 @@ class Player:
         self.surface = surface
         self.color = colors_players[random.randint(0,len(colors_players)-1)]
         self.name = name
+        self.pieces = list()
+        piece = Piece(surface,(self.x,self.y),self.color,self.mass,self.name)
     
     def update(self):
         self.move()
@@ -80,12 +82,33 @@ class Player:
         self.x += vx
         self.y += vy
         
+    def feed(self):
+        pass
+
+    def split(self):
+        pass
+
     def draw(self,cam):
         pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int((self.mass/2+3)*camera.zoom))
         pygame.draw.circle(self.surface,self.color,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass/2*camera.zoom))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
             drawText(self.name, (self.x*cam.zoom+cam.x-int(fw/2),self.y*cam.zoom+cam.y-int(fh/2)),(50,50,50))
+
+class Piece:
+    def __init__(self,surface,pos,color,mass,name,transition=False):
+        self.x,self.y = pos
+        self.mass = mass
+        self.splitting = transition
+        self.surface = surface
+        self.name = name
+
+    def draw(self):
+        pass
+
+    def update(self):
+        if(self.splitting):
+            pass
 
 class Cell:
     def __init__(self,surface):
@@ -138,10 +161,14 @@ while(True):
         if(e.type == pygame.KEYDOWN):
             if(e.key == pygame.K_ESCAPE):
                 pygame.quit()
+            if(e.key == pygame.K_SPACE):
+                blob.split()
+            if(e.key == pygame.K_w):
+                blob.feed()
         if(e.type == pygame.QUIT):
             pygame.quit()
     blob.update()
-    camera.zoom = 100/(blob.mass)
+    camera.zoom = 100/(blob.mass)+0.3
     camera.centre(blob)
     surface.fill((242,251,255))
     #surface.fill((0,0,0))
