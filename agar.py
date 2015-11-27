@@ -161,12 +161,14 @@ while(True):
         if(e.type == pygame.KEYDOWN):
             if(e.key == pygame.K_ESCAPE):
                 pygame.quit()
+                quit()
             if(e.key == pygame.K_SPACE):
                 blob.split()
             if(e.key == pygame.K_w):
                 blob.feed()
         if(e.type == pygame.QUIT):
             pygame.quit()
+            quit()
     blob.update()
     camera.zoom = 100/(blob.mass)+0.3
     camera.centre(blob)
