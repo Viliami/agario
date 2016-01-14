@@ -39,7 +39,7 @@ class Camera:
         self.width = screen_width
         self.height = screen_height
         self.zoom = 0.5
-   
+
     def centre(self,blobOrPos):
         if(isinstance(blobOrPos,Player)):
             p = blobOrPos
@@ -58,7 +58,7 @@ class Player:
         self.name = name
         self.pieces = list()
         piece = Piece(surface,(self.x,self.y),self.color,self.mass,self.name)
-    
+
     def update(self):
         self.move()
         self.collisionDetection()
@@ -81,7 +81,7 @@ class Player:
             vy = speed - math.fabs(vx)
         self.x += vx
         self.y += vy
-        
+
     def feed(self):
         pass
 
@@ -89,8 +89,12 @@ class Player:
         pass
 
     def draw(self,cam):
-        pygame.draw.circle(self.surface,(self.color[0]-int(self.color[0]/3),int(self.color[1]-self.color[1]/3),int(self.color[2]-self.color[2]/3)),(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int((self.mass/2+3)*camera.zoom))
-        pygame.draw.circle(self.surface,self.color,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass/2*camera.zoom))
+        col = self.color
+        zoom = cam.zoom
+        x = cam.x
+        y = cam.y
+        pygame.draw.circle(self.surface,(col[0]-int(col[0]/3),int(col[1]-col[1]/3),int(col[2]-col[2]/3)),(int(self.x*zoom+x),int(self.y*zoom+y)),int((self.mass/2+3)*zoom))
+        pygame.draw.circle(self.surface,col,(int(self.x*cam.zoom+cam.x),int(self.y*cam.zoom+cam.y)),int(self.mass/2*zoom))
         if(len(self.name) > 0):
             fw, fh = font.size(self.name)
             drawText(self.name, (self.x*cam.zoom+cam.x-int(fw/2),self.y*cam.zoom+cam.y-int(fh/2)),(50,50,50))
@@ -117,7 +121,7 @@ class Cell:
         self.mass = 7
         self.surface = surface
         self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
-        
+
     def draw(self,cam):
         pygame.draw.circle(self.surface,self.color,(int((self.x*cam.zoom+cam.x)),int(self.y*cam.zoom+cam.y)),int(self.mass*cam.zoom))
 
@@ -125,7 +129,7 @@ def spawn_cells(numOfCells):
     for i in range(numOfCells):
         cell = Cell(surface)
         cell_list.append(cell)
-        
+
 def draw_grid():
     for i in range(0,2001,25):
         pygame.draw.line(surface,(230,240,240),(0+camera.x,i*camera.zoom+camera.y),(2001*camera.zoom+camera.x,i*camera.zoom+camera.y),3)
