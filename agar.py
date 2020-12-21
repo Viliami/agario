@@ -1,21 +1,21 @@
 import pygame,random,math
 
 # General Settings
-colors_players = [(37,7,255),(35,183,253),(48,254,241),(19,79,251),(255,7,230),(255,7,23),(6,254,13)]
-colors_cells = [(80,252,54),(36,244,255),(243,31,46),(4,39,243),(254,6,178),(255,211,7),(216,6,254),(145,255,7),(7,255,182),(255,6,86),(147,7,255)]
-colors_viruses = [(66,254,71)]
-screen_width, screen_height = (800,500)
-cell_list = list()
+PLAYER_COLORS = [(37,7,255),(35,183,253),(48,254,241),(19,79,251),(255,7,230),(255,7,23),(6,254,13)]
+CELL_COLORS = [(80,252,54),(36,244,255),(243,31,46),(4,39,243),(254,6,178),(255,211,7),(216,6,254),(145,255,7),(7,255,182),(255,6,86),(147,7,255)]
+VIRUS_COLORS = [(66,254,71)]
+SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
+CELLS = list()
 
 # Initializing pygame modules
 pygame.init()
-surface = pygame.display.set_mode((screen_width,screen_height))
+MAIN_SURFACE = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
  # Transparent rect for score
-t_surface = pygame.Surface((95,25),pygame.SRCALPHA)
+SCOREBOARD_SURFACE = pygame.Surface((95,25),pygame.SRCALPHA)
 # Transparent rect for leaderboard
-t_lb_surface = pygame.Surface((155,278),pygame.SRCALPHA) 
-t_surface.fill((50,50,50,80))
-t_lb_surface.fill((50,50,50,80))
+LEADERBOARD_SURFACE = pygame.Surface((155,278),pygame.SRCALPHA) 
+SCOREBOARD_SURFACE.fill((50,50,50,80))
+LEADERBOARD_SURFACE.fill((50,50,50,80))
 pygame.display.set_caption("Agar.io")
 clock = pygame.time.Clock()
 try:
@@ -28,7 +28,7 @@ except:
 
 # Blits text to central (global) screen
 def drawText(message,pos,color=(255,255,255)):
-        surface.blit(font.render(message,1,color),pos)
+        MAIN_SURFACE.blit(font.render(message,1,color),pos)
 
 # Calculates Euclidean distance
 def getDistance(pos1,pos2):
@@ -45,16 +45,16 @@ class Camera:
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = screen_width
-        self.height = screen_height
+        self.width = SCREEN_WIDTH
+        self.height = SCREEN_HEIGHT
         self.zoom = 0.5
 
     # Makes sure that the given object will be at the center of player's view. Zooms out/ in as well
     def centre(self,blobOrPos):
         if(isinstance(blobOrPos,Player)):
             p = blobOrPos
-            self.x = (p.startX-(p.x*self.zoom))-p.startX+((screen_width/2))
-            self.y = (p.startY-(p.y*self.zoom))-p.startY+((screen_height/2))
+            self.x = (p.startX-(p.x*self.zoom))-p.startX+((SCREEN_WIDTH/2))
+            self.y = (p.startY-(p.y*self.zoom))-p.startY+((SCREEN_HEIGHT/2))
         elif(type(blobOrPos) == tuple):
             self.x,self.y = blobOrPos
 
@@ -68,7 +68,7 @@ class Player:
         self.surface = surface
 
         # Initialize player with a random color
-        self.color = colors_players[random.randint(0,len(colors_players)-1)]
+        self.color = PLAYER_COLORS[random.randint(0,len(PLAYER_COLORS)-1)]
         self.name = name
         self.pieces = list()
         piece = Piece(surface,(self.x,self.y),self.color,self.mass,self.name)
@@ -80,10 +80,10 @@ class Player:
 
     # Any cell closer than the radius of player will be eaten
     def collisionDetection(self):
-        for cell in cell_list:
+        for cell in CELLS:
             if(getDistance((cell.x,cell.y),(self.x,self.y)) <= self.mass/2):
                 self.mass+=0.5
-                cell_list.remove(cell)
+                CELLS.remove(cell)
 
     # Mama-mia code! This is what's goin on here:
     # @  Find the angle from the center of the screen to the mouse in radians [-Pi, Pi]
@@ -93,7 +93,7 @@ class Player:
     # @  Map resulting interval to [-1, 1]
     def move(self):
         dX,dY = pygame.mouse.get_pos()
-        rotation = math.atan2(dY-(float(screen_height)/2),dX-(float(screen_width)/2))*180/math.pi
+        rotation = math.atan2(dY-(float(SCREEN_HEIGHT)/2),dX-(float(SCREEN_WIDTH)/2))*180/math.pi
         speed = 5-1
         vx = speed * (90-math.fabs(rotation))/90
         vy = 0
@@ -149,7 +149,7 @@ class Cell:
         self.y = random.randint(20,1980)
         self.mass = 7
         self.surface = surface
-        self.color = colors_cells[random.randint(0,len(colors_cells)-1)]
+        self.color = CELL_COLORS[random.randint(0,len(CELL_COLORS)-1)]
 
     def draw(self,cam):
         pygame.draw.circle(self.surface,self.color,(int((self.x*cam.zoom+cam.x)),int(self.y*cam.zoom+cam.y)),int(self.mass*cam.zoom))
@@ -157,40 +157,40 @@ class Cell:
 # Populates the global cell-list with randomly placed cells
 def spawn_cells(numOfCells):
     for i in range(numOfCells):
-        cell = Cell(surface)
-        cell_list.append(cell)
+        cell = Cell(MAIN_SURFACE)
+        CELLS.append(cell)
 
 # Draws the background grid on every call
 def draw_grid():
     for i in range(0,2001,25):
-        pygame.draw.line(surface,(230,240,240),(0+camera.x,i*camera.zoom+camera.y),(2001*camera.zoom+camera.x,i*camera.zoom+camera.y),3)
-        pygame.draw.line(surface,(230,240,240),(i*camera.zoom+camera.x,0+camera.y),(i*camera.zoom+camera.x,2001*camera.zoom+camera.y),3)
+        pygame.draw.line(MAIN_SURFACE,(230,240,240),(0+camera.x,i*camera.zoom+camera.y),(2001*camera.zoom+camera.x,i*camera.zoom+camera.y),3)
+        pygame.draw.line(MAIN_SURFACE,(230,240,240),(i*camera.zoom+camera.x,0+camera.y),(i*camera.zoom+camera.x,2001*camera.zoom+camera.y),3)
 
 camera = Camera()
 # Main player
-blob = Player(surface,"Viliami")
+blob = Player(MAIN_SURFACE,"Viliami")
 spawn_cells(2000)
 
 # Draws the Heads-Up Display on screen.
 def draw_HUD():
     w,h = font.size("Score: "+str(int(blob.mass*2))+" ")
-    surface.blit(pygame.transform.scale(t_surface,(w,h)),(8,screen_height-30))
-    surface.blit(t_lb_surface,(screen_width-160,15))
-    drawText("Score: " + str(int(blob.mass*2)),(10,screen_height-30))
-    surface.blit(big_font.render("Leaderboard",0,(255,255,255)),(screen_width-157,20))
-    drawText("1. G #1",(screen_width-157,20+25))
-    drawText("2. G #2",(screen_width-157,20+25*2))
-    drawText("3. ISIS",(screen_width-157,20+25*3))
-    drawText("4. ur mom",(screen_width-157,20+25*4))
-    drawText("5. w = pro team",(screen_width-157,20+25*5))
-    drawText("6. jumbo",(screen_width-157,20+25*6))
-    drawText("7. [voz]plz team",(screen_width-157,20+25*7))
-    drawText("8. G #3",(screen_width-157,20+25*8))
-    drawText("9. doge",(screen_width-157,20+25*9))
+    MAIN_SURFACE.blit(pygame.transform.scale(SCOREBOARD_SURFACE,(w,h)),(8,SCREEN_HEIGHT-30))
+    MAIN_SURFACE.blit(LEADERBOARD_SURFACE,(SCREEN_WIDTH-160,15))
+    drawText("Score: " + str(int(blob.mass*2)),(10,SCREEN_HEIGHT-30))
+    MAIN_SURFACE.blit(big_font.render("Leaderboard",0,(255,255,255)),(SCREEN_WIDTH-157,20))
+    drawText("1. G #1",(SCREEN_WIDTH-157,20+25))
+    drawText("2. G #2",(SCREEN_WIDTH-157,20+25*2))
+    drawText("3. ISIS",(SCREEN_WIDTH-157,20+25*3))
+    drawText("4. ur mom",(SCREEN_WIDTH-157,20+25*4))
+    drawText("5. w = pro team",(SCREEN_WIDTH-157,20+25*5))
+    drawText("6. jumbo",(SCREEN_WIDTH-157,20+25*6))
+    drawText("7. [voz]plz team",(SCREEN_WIDTH-157,20+25*7))
+    drawText("8. G #3",(SCREEN_WIDTH-157,20+25*8))
+    drawText("9. doge",(SCREEN_WIDTH-157,20+25*9))
     if(blob.mass <= 500):
-        drawText("10. G #4",(screen_width-157,20+25*10))
+        drawText("10. G #4",(SCREEN_WIDTH-157,20+25*10))
     else:
-        drawText("10. Viliami",(screen_width-157,20+25*10),(210,0,0))
+        drawText("10. Viliami",(SCREEN_WIDTH-157,20+25*10),(210,0,0))
 
 # Main loop
 while(True):
@@ -220,13 +220,13 @@ while(True):
     # Update camera zoom. Is this supposed to be here?
     camera.zoom = 100/(blob.mass)+0.3
     camera.centre(blob)
-    surface.fill((242,251,255))
+    MAIN_SURFACE.fill((242,251,255))
     # Uncomment next line to get dark-theme
     #surface.fill((0,0,0))
 
     # Extremely painful procedure (re-painting the huge grid):
     draw_grid()
-    for c in cell_list:
+    for c in CELLS:
         c.draw(camera)
 
     # Update player's position on screen
