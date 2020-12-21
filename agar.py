@@ -5,6 +5,7 @@ PLAYER_COLORS = [(37,7,255),(35,183,253),(48,254,241),(19,79,251),(255,7,230),(2
 CELL_COLORS = [(80,252,54),(36,244,255),(243,31,46),(4,39,243),(254,6,178),(255,211,7),(216,6,254),(145,255,7),(7,255,182),(255,6,86),(147,7,255)]
 VIRUS_COLORS = [(66,254,71)]
 SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
+PLATFORM_WIDTH, PLATFORM_HEIGHT = (2000,2000)
 CELLS = list()
 
 # Initializing pygame modules
@@ -65,6 +66,7 @@ class Player:
         self.startX = self.x = random.randint(100,400)
         self.startY = self.y = random.randint(100,400)
         self.mass = 20
+        self.speed = 4
         self.surface = surface
 
         # Initialize player with a random color
@@ -85,24 +87,27 @@ class Player:
                 self.mass+=0.5
                 CELLS.remove(cell)
 
-    # Mama-mia code! This is what's goin on here:
-    # @  Find the angle from the center of the screen to the mouse in radians [-Pi, Pi]
-    # @  Convert radians to degrees [-180, 180]
-    # @  Normalize to [-1, 1]
-    # @  Project the point from unit circle to X-axis
-    # @  Map resulting interval to [-1, 1]
+
     def move(self):
         dX,dY = pygame.mouse.get_pos()
-        rotation = math.atan2(dY-(float(SCREEN_HEIGHT)/2),dX-(float(SCREEN_WIDTH)/2))*180/math.pi
-        speed = 5-1
-        vx = speed * (90-math.fabs(rotation))/90
+        # Find the angle from the center of the screen to the mouse in radians [-Pi, Pi]
+        rotation = math.atan2(dY-(float(SCREEN_HEIGHT)/2),dX-(float(SCREEN_WIDTH)/2))
+        # Convert radians to degrees [-180, 180]
+        rotation *= 180/math.pi
+        # Normalize to [-1, 1]
+        # First project the point from unit circle to X-axis
+        # Then map resulting interval to [-1, 1]
+        normalized = (90-math.fabs(rotation))/90
+        vx = self.speed * normalized
         vy = 0
         if(rotation < 0):
-            vy = -speed + math.fabs(vx)
+            vy = -self.speed + math.fabs(vx)
         else:
-            vy = speed - math.fabs(vx)
-        self.x += vx
-        self.y += vy
+            vy = self.speed - math.fabs(vx)
+        tmpX = self.x + vx
+        tmpY = self.y + vy
+        self.x = tmpX
+        self.y = tmpY
 
     def feed(self):
         pass
