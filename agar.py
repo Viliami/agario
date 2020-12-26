@@ -6,7 +6,7 @@ PLATFORM_WIDTH, PLATFORM_HEIGHT = (2000,2000)
 
 # Other Definitions
 NAME = "agar.io"
-VERSION = "0.1"
+VERSION = "0.2"
 
 # Pygame initialization
 pygame.init()
@@ -42,7 +42,6 @@ def getDistance(a, b):
 
 
 # Auxiliary Classes
-
 class Painter:
     """Used to organize the drawing/ updating procedure.
     Implemantation based on Strategy Pattern.
@@ -84,6 +83,10 @@ class Camera:
             self.x, self.y = blobOrPos
 
 
+    def update(self, target):
+        self.zoom = 100/(target.mass)+0.3
+        self.centre(blob)
+
 class Drawable:
     """Used as an abstract base-class for every drawable element.
     """
@@ -114,7 +117,8 @@ class Grid(Drawable):
 class HUD(Drawable):
     """Used to represent all necessary Head-Up Display information on screen.
     """
-    def __init__(self, surface, camera): #Please fix this nonsense (surface=None)
+    
+    def __init__(self, surface, camera):
         super().__init__(surface, camera)
         
     def draw(self):
@@ -281,8 +285,6 @@ class CellList(Drawable):
             cell.draw()
 
     
-            
-    
 
 # Initialize essential entities
 cam = Camera()
@@ -319,9 +321,7 @@ while(True):
 
     blob.move()
     blob.collisionDetection(cells.list)
-    # Update camera zoom. Is this supposed to be here?
-    cam.zoom = 100/(blob.mass)+0.3
-    cam.centre(blob)
+    cam.update(blob)
     MAIN_SURFACE.fill((242,251,255))
     # Uncomment next line to get dark-theme
     #surface.fill((0,0,0))
