@@ -60,60 +60,6 @@ class Painter:
         for drawing in self.paintings:
             drawing.draw()
 
-class Drawable:
-    """Used as an abstract base-class for every drawable element.
-    """
-
-    def __init__(self, surface):
-        self.surface = surface
-
-    def draw(self):
-        pass
-
-class Grid(Drawable):
-    """Used to represent the backgroun grid.
-    """
-
-    def __init__(self, surface):
-        super().__init__(surface)
-        self.color = (230,240,240)
-
-    def draw(self):
-        # A grid is a set of horizontal and prependicular lines
-        zoom = cam.zoom
-        x, y = cam.x, cam.y
-        for i in range(0,2001,25):
-            pygame.draw.line(self.surface,  self.color, (x, i*zoom + y), (2001*zoom + x, i*zoom + y), 3)
-            pygame.draw.line(self.surface, self.color, (i*zoom + x, y), (i*zoom + x, 2001*zoom + y), 3)
-
-class HUD(Drawable):
-    """Used to represent all necessary Head-Up Display information on screen.
-    """
-    def __init__(self, surface=None): #Please fix this nonsense (surface=None)
-        super().__init__(surface)
-        
-    def draw(self):
-        w,h = font.size("Score: "+str(int(blob.mass*2))+" ")
-        MAIN_SURFACE.blit(pygame.transform.scale(SCOREBOARD_SURFACE, (w, h)),
-                          (8,SCREEN_HEIGHT-30))
-        MAIN_SURFACE.blit(LEADERBOARD_SURFACE,(SCREEN_WIDTH-160,15))
-        drawText("Score: " + str(int(blob.mass*2)),(10,SCREEN_HEIGHT-30))
-        MAIN_SURFACE.blit(big_font.render("Leaderboard", 0, (255, 255, 255)),
-                          (SCREEN_WIDTH-157, 20))
-        drawText("1. G #1",(SCREEN_WIDTH-157,20+25))
-        drawText("2. G #2",(SCREEN_WIDTH-157,20+25*2))
-        drawText("3. ISIS",(SCREEN_WIDTH-157,20+25*3))
-        drawText("4. ur mom",(SCREEN_WIDTH-157,20+25*4))
-        drawText("5. w = pro team",(SCREEN_WIDTH-157,20+25*5))
-        drawText("6. jumbo",(SCREEN_WIDTH-157,20+25*6))
-        drawText("7. [voz]plz team",(SCREEN_WIDTH-157,20+25*7))
-        drawText("8. G #3",(SCREEN_WIDTH-157,20+25*8))
-        drawText("9. doge",(SCREEN_WIDTH-157,20+25*9))
-        if(blob.mass <= 500):
-            drawText("10. G #4",(SCREEN_WIDTH-157,20+25*10))
-        else:
-            drawText("10. Viliami",(SCREEN_WIDTH-157,20+25*10),(210,0,0))
-
         
 class Camera:
     """Used to represent the concept of POV.
@@ -138,6 +84,63 @@ class Camera:
             self.x, self.y = blobOrPos
 
 
+class Drawable:
+    """Used as an abstract base-class for every drawable element.
+    """
+
+    def __init__(self, surface, camera):
+        self.surface = surface
+        self.camera = camera
+
+    def draw(self):
+        pass
+
+class Grid(Drawable):
+    """Used to represent the backgroun grid.
+    """
+
+    def __init__(self, surface, camera):
+        super().__init__(surface, camera)
+        self.color = (230,240,240)
+
+    def draw(self):
+        # A grid is a set of horizontal and prependicular lines
+        zoom = self.camera.zoom
+        x, y = self.camera.x, self.camera.y
+        for i in range(0,2001,25):
+            pygame.draw.line(self.surface,  self.color, (x, i*zoom + y), (2001*zoom + x, i*zoom + y), 3)
+            pygame.draw.line(self.surface, self.color, (i*zoom + x, y), (i*zoom + x, 2001*zoom + y), 3)
+
+class HUD(Drawable):
+    """Used to represent all necessary Head-Up Display information on screen.
+    """
+    def __init__(self, surface, camera): #Please fix this nonsense (surface=None)
+        super().__init__(surface, camera)
+        
+    def draw(self):
+        w,h = font.size("Score: "+str(int(blob.mass*2))+" ")
+        MAIN_SURFACE.blit(pygame.transform.scale(SCOREBOARD_SURFACE, (w, h)),
+                          (8,SCREEN_HEIGHT-30))
+        MAIN_SURFACE.blit(LEADERBOARD_SURFACE,(SCREEN_WIDTH-160,15))
+        drawText("Score: " + str(int(blob.mass*2)),(10,SCREEN_HEIGHT-30))
+        MAIN_SURFACE.blit(big_font.render("Leaderboard", 0, (255, 255, 255)),
+                          (SCREEN_WIDTH-157, 20))
+        drawText("1. G #1",(SCREEN_WIDTH-157,20+25))
+        drawText("2. G #2",(SCREEN_WIDTH-157,20+25*2))
+        drawText("3. ISIS",(SCREEN_WIDTH-157,20+25*3))
+        drawText("4. ur mom",(SCREEN_WIDTH-157,20+25*4))
+        drawText("5. w = pro team",(SCREEN_WIDTH-157,20+25*5))
+        drawText("6. jumbo",(SCREEN_WIDTH-157,20+25*6))
+        drawText("7. [voz]plz team",(SCREEN_WIDTH-157,20+25*7))
+        drawText("8. G #3",(SCREEN_WIDTH-157,20+25*8))
+        drawText("9. doge",(SCREEN_WIDTH-157,20+25*9))
+        if(blob.mass <= 500):
+            drawText("10. G #4",(SCREEN_WIDTH-157,20+25*10))
+        else:
+            drawText("10. Viliami",(SCREEN_WIDTH-157,20+25*10),(210,0,0))
+
+
+
 
 class Player(Drawable):
     """Used to represent the concept of a player.
@@ -153,8 +156,8 @@ class Player(Drawable):
 
     FONT_COLOR = (50, 50, 50)
     
-    def __init__(self,surface,name = ""):
-        super().__init__(surface)
+    def __init__(self, surface, camera, name = ""):
+        super().__init__(surface, camera)
         self.x = random.randint(100,400)
         self.y = random.randint(100,400)
         self.mass = 20
@@ -216,8 +219,8 @@ class Player(Drawable):
     def draw(self):
         """Draws the player as an outlined circle.
         """
-        zoom = cam.zoom
-        x, y = cam.x, cam.y
+        zoom = self.camera.zoom
+        x, y = self.camera.x, self.camera.y
         center = (int(self.x*zoom + x), int(self.y*zoom + y))
         
         # Draw the ouline of the player as a darker, bigger circle
@@ -247,8 +250,8 @@ class Cell(Drawable): # Semantically, this is a parent class of player
     (255,6,86),
     (147,7,255)]
     
-    def __init__(self,surface):
-        super().__init__(surface)
+    def __init__(self, surface, camera):
+        super().__init__(surface, camera)
         self.x = random.randint(20,1980)
         self.y = random.randint(20,1980)
         self.mass = 7
@@ -257,21 +260,21 @@ class Cell(Drawable): # Semantically, this is a parent class of player
     def draw(self):
         """Draws a cell as a simple circle.
         """
-        zoom = cam.zoom
-        x,y = cam.x, cam.y
+        zoom = self.camera.zoom
+        x,y = self.camera.x, self.camera.y
         center = (int(self.x*zoom + x), int(self.y*zoom + y))
         pygame.draw.circle(self.surface, self.color, center, int(self.mass*zoom))
-
+        
 class CellList(Drawable):
     """Used to group and organize cells.
     It is also keeping track of living/ dead cells.
     """
 
-    def __init__(self, surface, numOfCells):
-        super().__init__(surface)
+    def __init__(self, surface, camera, numOfCells):
+        super().__init__(surface, camera)
         self.count = numOfCells
         self.list = []
-        for i in range(self.count): self.list.append(Cell(self.surface))
+        for i in range(self.count): self.list.append(Cell(self.surface, self.camera))
 
     def draw(self):
         for cell in self.list:
@@ -282,11 +285,12 @@ class CellList(Drawable):
     
 
 # Initialize essential entities
-grid = Grid(MAIN_SURFACE)
-cells = CellList(MAIN_SURFACE, 2000)
-blob = Player(MAIN_SURFACE, "GeoVas")
-hud = HUD(MAIN_SURFACE)
 cam = Camera()
+
+grid = Grid(MAIN_SURFACE, cam)
+cells = CellList(MAIN_SURFACE, cam, 2000)
+blob = Player(MAIN_SURFACE, cam, "GeoVas")
+hud = HUD(MAIN_SURFACE, cam)
 
 painter = Painter()
 painter.add(grid)
@@ -298,12 +302,14 @@ painter.add(hud)
 while(True):
     
     clock.tick(70)
+    
     for e in pygame.event.get():
         if(e.type == pygame.KEYDOWN):
             if(e.key == pygame.K_ESCAPE):
                 pygame.quit()
                 quit()
             if(e.key == pygame.K_SPACE):
+                del(cam)
                 blob.split()
             if(e.key == pygame.K_w):
                 blob.feed()
